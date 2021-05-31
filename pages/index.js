@@ -53,4 +53,16 @@ export const getStaticProps = async () => {
   };
 };
 
+// This funct runs ALWAYS on the server not on build process
+// export const getServerSideProps = async (context) => {
+//   const req = context.req;
+//   const res = context.res;
+
+//   return {
+//     props: {
+//       meetups: DUMMY_MEETUPS,
+//     },
+//   };
+// };
+
 export default HomePage;
