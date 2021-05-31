@@ -46,6 +46,10 @@ export const getStaticProps = async () => {
     props: {
       meetups: DUMMY_MEETUPS,
     },
+    // Data can be outdated so data in npm run build could be old data
+    // hence this property 10 secs
+    // with property this page wont just be generated in build process but on the server for secs specified if there are reqs for this page
+    revalidate: 10,
   };
 };
 
