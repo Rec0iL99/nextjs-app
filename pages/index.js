@@ -1,22 +1,8 @@
-import { useEffect, useState } from 'react';
+// import { useEffect, useState } from 'react';
+// This import will only be available in the server side bundle and not client side
+// Since it is used only in the server side or build process
+import { MongoClient } from 'mongodb';
 import MeetupList from '../components/meetups/MeetupList';
-
-const DUMMY_MEETUPS = [
-  {
-    id: 'm1',
-    title: 'First meetup',
-    image: 'https://www.fairobserver.com/wp-content/uploads/2020/12/Oman-2.jpg',
-    address: 'Some address 5, Some City, Some Country',
-    description: 'This is the first meetup',
-  },
-  {
-    id: 'm2',
-    title: 'Second meetup',
-    image: 'https://www.fairobserver.com/wp-content/uploads/2020/12/Oman-2.jpg',
-    address: 'Some address 10, Some City, Some Country',
-    description: 'This is the second meetup',
-  },
-];
 
 const HomePage = (props) => {
   /* 
@@ -42,9 +28,23 @@ export const getStaticProps = async () => {
   // Fetch from api
   // Connect to DB
 
+  const client = await MongoClient.connect(process.env.DATABASE);
+  const db = client.db();
+
+  const meetupCollection = db.collection('meetups');
+
+  const meetups = await meetupCollection.find().toArray();
+
+  client.close();
+
   return {
     props: {
-      meetups: DUMMY_MEETUPS,
+      meetups: meetups.map((meetup) => ({
+        title: meetup.title,
+        address: meetup.address,
+        image: meetup.image,
+        id: meetup._id.toString(),
+      })),
     },
     // Data can be outdated so data in npm run build could be old data
     // hence this property 10 secs
