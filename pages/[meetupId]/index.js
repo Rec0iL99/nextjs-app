@@ -37,9 +37,11 @@ export const getStaticPaths = async () => {
   client.close();
 
   return {
-    // false means paths contains all [meetupId] paths
-    // true means paths contains only some [meetupId] paths
-    fallback: false,
+    // false means paths contains all [meetupId] paths, so if user visits page that has not been pre rendered then next gives 404 error
+    // true means paths contains only some [meetupId] paths or blocking
+    // true or blocking next will give blank page not 404 then wait for dynamic data to be loaded
+    // fallback: false,
+    fallback: 'blocking',
     // [{ params: { meetupId: 'm1' } }, { params: { meetupId: 'm2' } }]
     paths: meetups.map((meetup) => ({
       params: { meetupId: meetup._id.toString() },
