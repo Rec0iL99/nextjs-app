@@ -1,12 +1,13 @@
+import { MongoClient, ObjectId } from 'mongodb';
 import MeetupDetail from '../../components/meetups/MeetupDetail';
 
-const MeetupDetails = () => {
+const MeetupDetails = (props) => {
   return (
     <MeetupDetail
-      image="https://www.fairobserver.com/wp-content/uploads/2020/12/Oman-2.jpg"
-      title="First meetup"
-      address="Some address 5, Some City, Some Country"
-      description="This is the first meetup"
+      image={props.meetupData.image}
+      title={props.meetupData.title}
+      address={props.meetupData.address}
+      description={props.meetupData.description}
     />
   );
 };
@@ -15,11 +16,26 @@ const MeetupDetails = () => {
 // Needed if getStaticProps is used in dynamic page
 export const getStaticPaths = async () => {
   // nextjs needs to pre generate all versions of this page with meetupId during build process
+
+  const client = await MongoClient.connect(process.env.DATABASE);
+  const db = client.db();
+
+  const meetupCollection = db.collection('meetups');
+
+  // {} for fetching all documents
+  // {_id: 1} with only _id property
+  const meetups = await meetupCollection.find({}, { _id: 1 }).toArray();
+
+  client.close();
+
   return {
     // false means paths contains all [meetupId] paths
     // true means paths contains only some [meetupId] paths
     fallback: false,
-    paths: [{ params: { meetupId: 'm1' } }, { params: { meetupId: 'm2' } }],
+    // [{ params: { meetupId: 'm1' } }, { params: { meetupId: 'm2' } }]
+    paths: meetups.map((meetup) => ({
+      params: { meetupId: meetup._id.toString() },
+    })),
   };
 };
 
@@ -30,15 +46,25 @@ export const getStaticProps = async (context) => {
   // this will only show in server console since funct only runs in server or build process
   console.log(meetupId);
 
+  const client = await MongoClient.connect(process.env.DATABASE);
+  const db = client.db();
+
+  const meetupCollection = db.collection('meetups');
+
+  const selectedMeetup = await meetupCollection.findOne({
+    _id: ObjectId(meetupId),
+  });
+
+  client.close();
+
   return {
     props: {
       meetupData: {
-        id: meetupId,
-        image:
-          'https://www.fairobserver.com/wp-content/uploads/2020/12/Oman-2.jpg',
-        title: 'First Meetup',
-        address: 'Some address 5, Some City, Some Country',
-        description: 'This is the first meetup',
+        id: selectedMeetup._id.toString(),
+        address: selectedMeetup.address,
+        title: selectedMeetup.title,
+        image: selectedMeetup.image,
+        description: selectedMeetup.description,
       },
     },
   };
