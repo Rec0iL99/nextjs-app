@@ -2,6 +2,8 @@
 // This import will only be available in the server side bundle and not client side
 // Since it is used only in the server side or build process
 import { MongoClient } from 'mongodb';
+import Head from 'next/head';
+import { Fragment } from 'react';
 import MeetupList from '../components/meetups/MeetupList';
 
 const HomePage = (props) => {
@@ -18,7 +20,18 @@ const HomePage = (props) => {
   // }, []);
   // No need of above due to getStatic props
 
-  return <MeetupList meetups={props.meetups} />;
+  return (
+    <Fragment>
+      <Head>
+        <title>Nextjs Meetups</title>
+        <meta
+          name="description"
+          content="Browse a list of all meetups with address"
+        />
+      </Head>
+      <MeetupList meetups={props.meetups} />
+    </Fragment>
+  );
 };
 
 // Way to move data fetching away from client side and in server side or build process
